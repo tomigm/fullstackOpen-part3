@@ -35,7 +35,11 @@ app.get('/', (request, response) => {
   })
   
   app.get('/api/persons', (request, response) => {
-    Person.find({}).then(persons => {
+    const query = Object.fromEntries(
+      Object.entries(request.query).filter(([key, value]) => value)
+    );
+
+    Person.find(query).then(persons => {
       response.json(persons)
     }).catch(error => next(error))
   })
@@ -90,7 +94,7 @@ app.get('/', (request, response) => {
         person.number = body.number
         return person.save().then(savedPerson => {
           console.log('Person updated!');
-          response.json(savedPerson);
+          response.json({savedPerson: savedPerson, type: "updated"});
         });
       } else{
         const person = new Person({
@@ -130,7 +134,7 @@ app.get('/', (request, response) => {
       number: body.number,
     }
   
-    Person.findByIdAndUpdate(request.params.id, person, { new: true })
+    Person.findByIdAndUpdate(request.params.id, person, { new: true, runValidators: true, context: 'query' })
       .then(updatedPerson => {
         response.json(updatedPerson)
       })
@@ -143,7 +147,9 @@ app.get('/', (request, response) => {
     if (error.name === 'CastError') {
       return response.status(400).send({ error: 'malformatted id' })
     } 
-  
+    if (error.name === 'ValidationError') {
+      return response.status(400).send({ error: error })
+    } 
     next(error)
   }
   
