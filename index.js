@@ -138,7 +138,9 @@ app.get('/', (request, response) => {
       })
       .catch(error => next(error))
   })
-
+  const unknownEndpoint = (request, response) => {
+    response.status(404).send({ error: 'unknown endpoint' })
+  }
   const errorHandler = (error, request, response, next) => {
     console.error(error.message)
   
@@ -151,7 +153,7 @@ app.get('/', (request, response) => {
     next(error)
   }
   
-
+  app.use(unknownEndpoint)
   app.use(errorHandler)
   const PORT = process.env.PORT || 3001
   app.listen(PORT, () => {
