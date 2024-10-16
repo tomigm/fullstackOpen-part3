@@ -3,8 +3,6 @@ const express = require('express');
 const  morgan = require('morgan');
 const cors = require('cors');
 const Person = require('./models/person');
-const { default: mongoose } = require('mongoose');
-
 
 morgan.token('reqBody', function (req, res) { 
   return JSON.stringify(req.body)
